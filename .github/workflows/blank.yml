@@ -38,5 +38,5 @@ jobs:
         
       - name: training8 HTML test
         run: |
-          npx htmlhint index.html,
-          npx htmlhint about.html.
+          npx htmlhint index.html
+          npx htmlhint about.html
