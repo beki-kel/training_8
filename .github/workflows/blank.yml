@@ -33,6 +33,8 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-      
+      - name: Adding dependencies
+        run: npm install htmlhint --save-dev
+        
       - name: training8 HTML test
         run: npx htmlhint index.html
