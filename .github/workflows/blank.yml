@@ -33,3 +33,6 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+      
+      - name: training8 HTML test
+        run: npx htmlhint index.html
