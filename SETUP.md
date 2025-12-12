@@ -39,44 +39,92 @@ Then open: http://localhost:5000
 
 ---
 
-## Production Setup
+## Integration Setup
 
-### 1. Connect Your Integrations
+Current connects to your team's tools to automatically keep your knowledge base up-to-date. See detailed guides for each integration below.
 
-*Current* uses Replit's built-in integration system for secure OAuth connections. Go to **Settings > Integrations** in your app to connect:
+### Quick Reference
 
-#### Required Integrations
+| Integration | Status | Setup Time | Documentation |
+|------------|--------|------------|---------------|
+| **Notion** | Required | 10 min | [NOTION_SETUP.md](./NOTION_SETUP.md) |
+| **Anthropic AI** | Required | 5 min | Get key at [console.anthropic.com](https://console.anthropic.com) |
+| **Email (Resend)** | Required | 5 min | Get key at [resend.com](https://resend.com) |
+| **Slack** | Optional | 20 min | [SLACK_SETUP.md](./SLACK_SETUP.md) |
+| **Google Drive** | Optional | 30 min | [GOOGLE_DRIVE_SETUP.md](./GOOGLE_DRIVE_SETUP.md) |
+| **Zoom** | Optional | 30 min | [MEETING_SETUP.md](./MEETING_SETUP.md) |
+| **Google Meet** | Optional | 30 min | [MEETING_SETUP.md](./MEETING_SETUP.md) |
 
-| Integration | Purpose | How to Connect |
-|-------------|---------|----------------|
-| **Notion** | Your knowledge base where updates are synced | Click "Connect" in Settings, authorize with Notion |
-| **Stripe** | Payment processing for subscriptions | Already configured automatically |
+### Complete Integration Guide
 
-#### Optional Integrations
+**📚 See [INTEGRATIONS_MASTER_GUIDE.md](./INTEGRATIONS_MASTER_GUIDE.md)** for:
+- Complete integration overview
+- Setup order recommendations
+- Comparison of all integrations
+- Troubleshooting guide
+- Best practices
 
-| Integration | Purpose | How to Connect |
-|-------------|---------|----------------|
-| **Slack** | Monitor channels for knowledge updates | Click "Connect" in Settings, authorize with Slack |
-| **Google Drive** | Watch folders for document changes | Click "Connect" in Settings, authorize with Google |
+### Setup Priority
 
-### 2. Environment Variables
+**1. Core Requirements (Required)**
+```bash
+✅ Database (PostgreSQL)
+✅ Session Secret
+✅ Anthropic AI API Key
+✅ Email Service (Resend)
+✅ Notion Integration
+```
 
-Most integrations are handled automatically through Replit connectors. The following are pre-configured:
+**2. Input Sources (Choose one or more)**
+```bash
+☐ Slack - Best for team conversations
+☐ Google Drive - Best for documents
+☐ Zoom - Best for meeting transcripts
+☐ Google Meet - Alternative to Zoom
+```
 
-| Variable | Description | Status |
-|----------|-------------|--------|
-| `DATABASE_URL` | PostgreSQL connection | Auto-configured |
-| `SESSION_SECRET` | Session encryption | Auto-configured |
-| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Claude AI for knowledge extraction | Auto-configured |
+### Environment Variables
 
-#### Optional Manual Configuration
+#### Required Variables
 
-For email notifications (team invitations), you can add:
+```env
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/current_db
 
-| Variable | Description | Where to Get It |
-|----------|-------------|-----------------|
-| `RESEND_API_KEY` | Email service for invitations | [resend.com](https://resend.com) |
-| `RESEND_FROM_EMAIL` | Sender email address | Your verified domain |
+# Session
+SESSION_SECRET=<generate with: openssl rand -hex 32>
+
+# AI Service (Required for knowledge extraction)
+AI_INTEGRATIONS_ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Email Service (Required for team invitations)
+RESEND_API_KEY=re_your-key-here
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+
+# Notion (Required - output destination)
+NOTION_CLIENT_ID=your-client-id
+NOTION_CLIENT_SECRET=your-client-secret
+```
+
+#### Optional Variables (Input Sources)
+
+```env
+# Slack Integration
+SLACK_APP_TOKEN=xapp-your-token
+SLACK_BOT_TOKEN=xoxb-your-token
+SLACK_SIGNING_SECRET=your-secret
+
+# Google Integrations (Drive, Meet)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# Zoom Integration
+ZOOM_CLIENT_ID=your-zoom-client-id
+ZOOM_CLIENT_SECRET=your-zoom-client-secret
+ZOOM_WEBHOOK_SECRET=your-webhook-secret
+```
+
+**📄 See [.env.example](./.env.example)** for complete configuration template with detailed comments.
 
 ### 3. Invite Your Team
 
