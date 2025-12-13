@@ -341,7 +341,7 @@ export async function processSlackMessageForKnowledge(
       };
     }
 
-    const notionPage = await findBestMatchingPage(result.title).catch(() => null);
+    const notionPage = await findBestMatchingPage(result.title, teamId).catch(() => null);
 
     const suggestion = await storage.createSuggestion({
       teamId,

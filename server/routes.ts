@@ -175,16 +175,22 @@ async function getTeamIdFromRequest(req: Request): Promise<string> {
     throw new Error("User has no teams");
   }
 
+  // Prefer the team where user is owner
+  const ownedTeam = await storage.getTeamByOwner(userId);
+  if (ownedTeam && teams.some(t => t.id === ownedTeam.id)) {
+    return ownedTeam.id;
+  }
+
   return teams[0].id;
 }
 
-async function findBestMatchingPageSafe(title: string): Promise<{
+async function findBestMatchingPageSafe(title: string, teamId?: string): Promise<{
   id: string | null;
   url: string;
   content: string | null;
 }> {
   try {
-    const page = await findBestMatchingPage(title);
+    const page = await findBestMatchingPage(title, teamId);
     if (page) {
       return {
         id: page.id,
@@ -839,8 +845,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let notionPageId = suggestion.notionPageId;
         let notionPageUrl = suggestion.notionPageUrl;
 
+        console.log(`[Approval] Suggestion: ${suggestion.title}`);
+        console.log(`[Approval] Has notionPageId: ${notionPageId ? 'YES (' + notionPageId + ')' : 'NO'}`);
+        console.log(`[Approval] TeamId: ${teamId}`);
+
         if (!notionPageId) {
-          const matchingPage = await findBestMatchingPage(suggestion.title);
+          console.log(`[Approval] Searching for matching page for title: "${suggestion.title}"`);
+          const matchingPage = await findBestMatchingPage(suggestion.title, teamId);
+          console.log(`[Approval] Found matching page:`, matchingPage ? matchingPage.id : 'NONE');
+          
           if (matchingPage) {
             notionPageId = matchingPage.id;
             notionPageUrl = matchingPage.url;
@@ -850,16 +863,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { notionPageId, notionPageUrl }
             );
           } else {
-            return res.status(409).json({
-              error: "Cannot approve: No matching Notion page found",
-              details: "Please manually link this suggestion to a Notion page or create a new page first"
-            });
+            // Fallback: Try to get ANY available Notion page for this team
+            console.log(`[Approval] No exact match found, searching for any available page...`);
+            try {
+              const { searchNotionPages } = await import("./services/notion");
+              const allPages = await searchNotionPages("", teamId);
+              
+              if (allPages && allPages.length > 0) {
+                // Use the first available page as fallback
+                const fallbackPage = allPages[0];
+                notionPageId = fallbackPage.id;
+                notionPageUrl = fallbackPage.url;
+                
+                console.log(`[Approval] Using fallback page: ${fallbackPage.title || fallbackPage.id}`);
+                
+                await storage.updateSuggestionNotionPage(
+                  req.params.id,
+                  { notionPageId, notionPageUrl }
+                );
+              } else {
+                console.error(`[Approval] ERROR: No Notion pages available for team ${teamId}`);
+                return res.status(409).json({
+                  error: "Cannot approve: No Notion pages found",
+                  details: "Please share at least one Notion page with your integration, then try again"
+                });
+              }
+            } catch (fallbackError) {
+              console.error(`[Approval] Fallback search failed:`, fallbackError);
+              return res.status(409).json({
+                error: "Cannot approve: Unable to find Notion page",
+                details: "Please ensure Notion is connected and pages are shared with the integration"
+              });
+            }
           }
         }
 
         const success = await updateNotionPage(
           notionPageId,
-          suggestion.proposedContent
+          suggestion.proposedContent,
+          teamId
         );
 
         if (success) {
@@ -1344,7 +1386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const teamId = await getTeamIdFromRequest(req).catch(() => null);
 
       const [notionStatus, slackStatus, emailStatus, driveStatus, teamIntegrations] = await Promise.all([
-        testNotionConnection(),
+        teamId ? testNotionConnection(teamId) : testNotionConnection(),
         testSlackConnection(),
         testEmailConnection(),
         testDriveConnection(),
@@ -1537,7 +1579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("[Slack Demo] Creating demo suggestion:", scenario.title);
 
       // Create a deterministic high-confidence suggestion directly
-      const notionPage = await findBestMatchingPageSafe(scenario.title);
+      const notionPage = await findBestMatchingPageSafe(scenario.title, teamId);
       const confidence = 85 + Math.floor(Math.random() * 10); // 85-94%
 
       const suggestion = await storage.createSuggestion({
@@ -1928,7 +1970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ detected: false });
       }
 
-      const notionPage = await findBestMatchingPageSafe(result.title);
+      const notionPage = await findBestMatchingPageSafe(result.title, teamId);
 
       const suggestion = await storage.createSuggestion({
         teamId,

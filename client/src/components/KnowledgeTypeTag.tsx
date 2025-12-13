@@ -7,7 +7,8 @@ export type KnowledgeType =
   | "fact"
   | "process"
   | "engineering"
-  | "product";
+  | "product"
+  | "technical";
 
 interface KnowledgeTypeTagProps {
   type: KnowledgeType;
@@ -24,10 +25,16 @@ const typeConfig: Record<
   process: { label: "Process", className: "bg-chart-5/10 text-chart-5 border-chart-5/20" },
   engineering: { label: "Engineering Spec", className: "bg-primary/10 text-primary border-primary/20" },
   product: { label: "Product Update", className: "bg-destructive/10 text-destructive border-destructive/20" },
+  technical: { label: "Technical", className: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+};
+
+const defaultConfig = { 
+  label: "Unknown", 
+  className: "bg-gray-500/10 text-gray-500 border-gray-500/20" 
 };
 
 export function KnowledgeTypeTag({ type }: KnowledgeTypeTagProps) {
-  const config = typeConfig[type];
+  const config = typeConfig[type] || defaultConfig;
   
   return (
     <Badge

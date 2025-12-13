@@ -387,20 +387,33 @@ export async function updateNotionPage(pageId: string, content: string, teamId?:
   try {
     const notion = await getNotionClient(teamId);
     
-    const existingBlocks = await notion.blocks.children.list({
-      block_id: pageId,
-    });
-    
-    for (const block of existingBlocks.results) {
-      try {
-        await notion.blocks.delete({ block_id: block.id });
-      } catch (deleteError) {
-        console.warn(`Could not delete block ${block.id}:`, deleteError);
-      }
-    }
+    // APPEND mode: Don't delete existing content, just add new content at the end
+    // This is faster and preserves existing page content
+    console.log(`[Notion] Appending content to page ${pageId} (${content.length} chars)`);
     
     const lines = content.split("\n");
     const children: any[] = [];
+    
+    // Add a divider and timestamp to separate updates
+    children.push({
+      object: "block",
+      type: "divider",
+      divider: {}
+    });
+    
+    children.push({
+      object: "block",
+      type: "paragraph",
+      paragraph: {
+        rich_text: [{
+          type: "text",
+          text: { 
+            content: `📝 Update from HeyCurrent - ${new Date().toLocaleString()}` 
+          },
+          annotations: { italic: true, color: "gray" }
+        }]
+      }
+    });
     
     for (const line of lines) {
       if (!line.trim()) continue;

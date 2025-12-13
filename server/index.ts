@@ -8,6 +8,7 @@ import { WebhookHandlers } from "./webhookHandlers";
 import { initializeSlackSocketMode, processSlackMessageForKnowledge } from "./services/slack";
 import { initializeSlackManager, shutdownSlackManager } from "./services/slackManager";
 import { startTrialWarningScheduler } from "./services/notifications";
+import { syncEnvIntegrationsForAllTeams } from "./services/syncEnvIntegrations";
 import { storage } from "./storage";
 
 const app = express();
@@ -170,6 +171,10 @@ app.use((req, res, next) => {
   server.listen(port, host, async () => {
     log(`serving on port ${port}`);
     await seedDemoData();
+    
+    // Auto-sync .env integrations to database for all teams
+    // This ensures integrations work even without OAuth/Replit connectors
+    await syncEnvIntegrationsForAllTeams();
     
     // Start trial warning email scheduler
     startTrialWarningScheduler();

@@ -286,15 +286,26 @@ export function OnboardingWizard({ onComplete, onDismiss }: OnboardingWizardProp
               />
             </div>
             
-            {(integrationStatus?.slack.connected || integrationStatus?.google_drive.connected) && (
+            <div className="flex gap-3">
+              {(integrationStatus?.slack.connected || integrationStatus?.google_drive.connected) && (
+                <Button 
+                  className="flex-1" 
+                  onClick={() => setCurrentStep(3)}
+                  data-testid="button-source-next"
+                >
+                  Continue <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              )}
               <Button 
-                className="w-full" 
+                variant={integrationStatus?.slack.connected || integrationStatus?.google_drive.connected ? "outline" : "default"}
+                className={integrationStatus?.slack.connected || integrationStatus?.google_drive.connected ? "flex-1" : "w-full"}
                 onClick={() => setCurrentStep(3)}
-                data-testid="button-source-next"
+                data-testid="button-skip-to-demo"
               >
-                Continue <ChevronRight className="ml-1 h-4 w-4" />
+                {integrationStatus?.slack.connected || integrationStatus?.google_drive.connected ? "Skip to Demo" : "Skip & Try Demo"}
+                <Sparkles className="ml-2 h-4 w-4" />
               </Button>
-            )}
+            </div>
             
             <Button variant="ghost" onClick={() => setCurrentStep(0)} className="w-full">
               Back to Overview
