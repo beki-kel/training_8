@@ -108,20 +108,20 @@ export default function AcceptInvitation() {
             {invitation && (
               <div className="bg-muted/50 rounded-md p-4 text-sm">
                 <p className="text-muted-foreground">
-                  You've been invited to join <strong>{invitation.teamName}</strong>
-                </p>
+                You've been invited to join <strong>{invitation.teamName}</strong>
+              </p>
                 <p className="text-muted-foreground mt-2">
                   <strong>Important:</strong> Please sign in with <strong className="text-foreground">{invitation.email}</strong>
                 </p>
               </div>
             )}
             <div className="space-y-2">
-              <Button asChild className="w-full" data-testid="button-login-to-accept">
+            <Button asChild className="w-full" data-testid="button-login-to-accept">
                 <a href={`/login?redirect=/invite/${params.token}`}>Sign In to Accept Invitation</a>
               </Button>
               <Button asChild variant="outline" className="w-full" data-testid="button-signup-to-accept">
                 <a href={`/signup?redirect=/invite/${params.token}`}>Create Account</a>
-              </Button>
+            </Button>
             </div>
           </CardContent>
         </Card>
@@ -247,8 +247,8 @@ export default function AcceptInvitation() {
                 className="w-full" 
                 data-testid="button-go-home-error"
               >
-                Go to Dashboard
-              </Button>
+              Go to Dashboard
+            </Button>
             </div>
           </CardContent>
         </Card>

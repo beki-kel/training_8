@@ -59,21 +59,10 @@ export const getQueryFn: <T>(options: {
       }
 
       const res = await fetch(url, {
-        credentials: "include",
-      });
+      credentials: "include",
+    });
 
-      // Log auth endpoint status in BROWSER console for verification
-      if (url === "/api/auth/user") {
-        if (res.ok) {
-          console.log(`✅ GET ${url} → ${res.status} OK (authenticated)`);
-        } else if (res.status === 401) {
-          console.log(`❌ GET ${url} → ${res.status} Unauthorized (not logged in)`);
-        } else {
-          console.log(`⚠️ GET ${url} → ${res.status} ${res.statusText}`);
-        }
-      }
-
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
         return null;
       }
 

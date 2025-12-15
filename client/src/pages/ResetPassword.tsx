@@ -94,9 +94,9 @@ export default function ResetPassword() {
   }
 
   if (resetComplete) {
-    // Auto-redirect to dashboard after 2 seconds
+    // Auto-redirect to login after 2 seconds
     setTimeout(() => {
-      setLocation("/dashboard");
+      setLocation("/login");
     }, 2000);
 
     return (
@@ -107,13 +107,13 @@ export default function ResetPassword() {
             <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center">
               <Check className="w-8 h-8 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">Password set successfully!</h1>
+            <h1 className="text-3xl font-bold text-slate-900">Password reset successfully!</h1>
             <p className="text-lg text-slate-600">
-              Taking you to your dashboard...
+              You can now log in with your new password.
             </p>
-            <Link href="/dashboard">
-              <Button size="lg" className="mt-4" data-testid="button-go-to-dashboard">
-                Go to Dashboard now
+            <Link href="/login">
+              <Button size="lg" className="mt-4" data-testid="button-go-to-login">
+                Go to Login
               </Button>
             </Link>
           </div>

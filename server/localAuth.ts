@@ -303,13 +303,6 @@ export function setupLocalAuth(app: Express) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // Check if user uses email auth
-      if (user.authProvider !== "email") {
-        return res.status(400).json({
-          error: "This account uses Replit login. Please sign in with Replit."
-        });
-      }
-
       // Check password
       if (!user.passwordHash) {
         return res.status(401).json({ error: "Invalid email or password" });
